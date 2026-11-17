@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Start jack_mixer + VBAN ontvanger/zender + qpwgraph (patchbay met blokken en draden).
-# Pas hieronder de instellingen aan. Stoppen: sluit qpwgraph of druk Ctrl+C.
+# Draait los van de terminal (venster sluiten mag). Stoppen: sluit qpwgraph.
 
 # ---- INSTELLINGEN ----------------------------------------------------------
 VBAN_IP="192.168.1.2"     # IP van de andere computer met VBAN
@@ -19,15 +19,26 @@ PATCHBAY_FILE="$MAP/mixer.qpwgraph"
 set -u
 pids=()
 
+for c in pw-jack jack_mixer qpwgraph vban_receptor vban_emitter setsid; do
+    command -v "$c" >/dev/null || { echo "FOUT: '$c' is niet geinstalleerd."; exit 1; }
+done
+
+# Loskoppelen van de terminal: anders stopt alles (zonder opslaan) zodra je
+# het terminalvenster sluit. Meldingen gaan naar mixer.log.
+LOG="$MAP/mixer.log"
+if [ "${MIXER_LOSGEKOPPELD:-}" != 1 ]; then
+    MIXER_LOSGEKOPPELD=1 setsid "$MAP/$(basename "${BASH_SOURCE[0]}")" "$@" \
+        >"$LOG" 2>&1 </dev/null &
+    echo "Mixer gestart. Je kunt deze terminal nu gerust sluiten."
+    echo "Stoppen: sluit qpwgraph. Meldingen: $LOG"
+    exit 0
+fi
+
 stop_alles() {
     echo "Stoppen..."
     for p in "${pids[@]}"; do kill "$p" 2>/dev/null; done
 }
 trap stop_alles EXIT INT TERM
-
-for c in pw-jack jack_mixer qpwgraph vban_receptor vban_emitter; do
-    command -v "$c" >/dev/null || { echo "FOUT: '$c' is niet geinstalleerd."; exit 1; }
-done
 
 # Oude onderdelen van een vorige start opruimen. Anders is VBAN-poort bezet
 # ("unable to bind socket") en sluit een tweede qpwgraph meteen af, waarna
