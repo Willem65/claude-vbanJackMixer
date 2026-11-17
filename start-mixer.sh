@@ -7,6 +7,13 @@ VBAN_IP="192.168.1.2"     # IP van de andere computer met VBAN
 VBAN_PORT="6980"          # standaard VBAN-poort
 VBAN_IN_NAME="test-vban"  # streamnaam die we ONTVANGEN (max 16 tekens)
 VBAN_OUT_NAME="test-vban" # streamnaam die we VERSTUREN (max 16 tekens)
+
+# Opgeslagen opstelling (naast dit script). Bestaan ze, dan worden ze ingeladen:
+#   jack_mixer: File -> Save As        -> mixer.xml       (kanalen en faders)
+#   qpwgraph:   Patchbay -> Save As    -> mixer.qpwgraph  (draden)
+MAP="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+MIXER_FILE="$MAP/mixer.xml"
+PATCHBAY_FILE="$MAP/mixer.qpwgraph"
 # ----------------------------------------------------------------------------
 
 set -u
@@ -48,8 +55,13 @@ if oud_draait; then
     fi
 fi
 
-echo "jack_mixer starten..."
-pw-jack jack_mixer & pids+=($!)
+if [ -f "$MIXER_FILE" ]; then
+    echo "jack_mixer starten met $MIXER_FILE..."
+    pw-jack jack_mixer -c "$MIXER_FILE" & pids+=($!)
+else
+    echo "jack_mixer starten (leeg: $MIXER_FILE bestaat nog niet)..."
+    pw-jack jack_mixer & pids+=($!)
+fi
 
 echo "VBAN ontvanger: $VBAN_IN_NAME van $VBAN_IP:$VBAN_PORT"
 pw-jack vban_receptor -i "$VBAN_IP" -p "$VBAN_PORT" -s "$VBAN_IN_NAME" -b jack & pids+=($!)
@@ -63,5 +75,12 @@ echo "VBAN zender: $VBAN_OUT_NAME naar $VBAN_IP:$VBAN_PORT"
 vban_emitter -i "$VBAN_IP" -p "$VBAN_PORT" -s "$VBAN_OUT_NAME" -b pulseaudio -r 48000 -x 1024 & pids+=($!)
 
 sleep 1
-echo "qpwgraph openen..."
-qpwgraph
+if [ -f "$PATCHBAY_FILE" ]; then
+    # -a -x: patchbay actief + exclusief, dus qpwgraph legt de opgeslagen draden
+    # terug en haalt automatische koppelingen weg (zoals vban -> USB-ingang).
+    echo "qpwgraph openen met $PATCHBAY_FILE..."
+    qpwgraph -a -x "$PATCHBAY_FILE"
+else
+    echo "qpwgraph openen (geen draden: $PATCHBAY_FILE bestaat nog niet)..."
+    qpwgraph
+fi
