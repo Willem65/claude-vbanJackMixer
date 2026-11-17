@@ -22,6 +22,32 @@ for c in pw-jack jack_mixer qpwgraph vban_receptor vban_emitter; do
     command -v "$c" >/dev/null || { echo "FOUT: '$c' is niet geinstalleerd."; exit 1; }
 done
 
+# Oude onderdelen van een vorige start opruimen. Anders is VBAN-poort bezet
+# ("unable to bind socket") en sluit een tweede qpwgraph meteen af, waarna
+# dit script alles weer stopt.
+oud_draait() {
+    pgrep -u "$USER" -x qpwgraph >/dev/null ||
+    pgrep -u "$USER" -x vban_receptor >/dev/null ||
+    pgrep -u "$USER" -x vban_emitter >/dev/null ||
+    pgrep -u "$USER" -f '(^|/)jack_mixer( |$)' >/dev/null
+}
+if oud_draait; then
+    echo "Oude mixer-onderdelen draaien nog, die worden eerst gestopt..."
+    pkill -u "$USER" -x qpwgraph
+    pkill -u "$USER" -x vban_receptor
+    pkill -u "$USER" -x vban_emitter
+    pkill -u "$USER" -f '(^|/)jack_mixer( |$)'
+    for _ in 1 2 3 4 5 6 7 8 9 10; do
+        oud_draait || break
+        sleep 0.5
+    done
+    if oud_draait; then
+        echo "FOUT: oude onderdelen willen niet stoppen:"
+        pgrep -a -u "$USER" -f 'qpwgraph|vban_receptor|vban_emitter|jack_mixer'
+        exit 1
+    fi
+fi
+
 echo "jack_mixer starten..."
 pw-jack jack_mixer & pids+=($!)
 
