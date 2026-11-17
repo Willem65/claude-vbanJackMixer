@@ -1,0 +1,23 @@
+diff --git a/src/common/backend/pulseaudio_backend.c b/src/common/backend/pulseaudio_backend.c
+index cc40a6a..86ab5ee 100644
+--- a/src/common/backend/pulseaudio_backend.c
++++ b/src/common/backend/pulseaudio_backend.c
+@@ -85,7 +85,8 @@ int pulseaudio_open(audio_backend_handle_t handle, char const* device_name, enum
+         .tlength    = buffer_size,
+         .prebuf     = buffer_size / 2,
+         .minreq     = (unsigned int)(-1),
+-        .fragsize   = (unsigned int)(-1)
++        /* record: kleine fragmenten i.p.v. ~2s standaard, anders gaat VBAN in stoten */
++        .fragsize   = (direction == AUDIO_IN) ? buffer_size : (unsigned int)(-1)
+     };
+ 
+     if (handle == 0)
+@@ -95,7 +96,7 @@ int pulseaudio_open(audio_backend_handle_t handle, char const* device_name, enum
+     }
+ 
+     pulseaudio_backend->pulseaudio_handle = pa_simple_new(0, "vban", (direction == AUDIO_OUT) ? PA_STREAM_PLAYBACK : PA_STREAM_RECORD, (device_name[0] == '\0') ? 0 : device_name,
+-        (direction == AUDIO_OUT) ? "playback": "record", &ss, 0, (direction == AUDIO_OUT) ? &ba : 0, &ret);
++        (direction == AUDIO_OUT) ? "playback": "record", &ss, 0, &ba, &ret);
+     if (pulseaudio_backend->pulseaudio_handle == 0)
+     {
+         logger_log(LOG_FATAL, "pulseaudio_open: open error: %s", pa_strerror(ret));

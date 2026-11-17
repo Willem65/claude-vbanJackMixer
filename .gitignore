@@ -1,0 +1,4 @@
+# vban wordt los gekloond en gepatcht (zie README)
+vban/
+.claude/
+*.orig
