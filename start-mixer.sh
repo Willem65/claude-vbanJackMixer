@@ -62,6 +62,11 @@ oud_draait() {
 }
 if oud_draait; then
     echo "Oude mixer-onderdelen draaien nog, die worden eerst gestopt..."
+    # Een oude jack_mixer die met een bestand (-c) draait eerst laten opslaan.
+    if pkill -USR1 -u "$USER" -f '(^|/)jack_mixer( .*)? -c '; then
+        echo "Oude jack_mixer opgeslagen."
+        sleep 1
+    fi
     pkill -u "$USER" -x qpwgraph
     pkill -u "$USER" -x vban_receptor
     pkill -u "$USER" -x vban_emitter
