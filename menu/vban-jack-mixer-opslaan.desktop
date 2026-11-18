@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Mixer opslaan
+Comment=Faders, draden en plek van de blokken opslaan
+Exec=/home/willem/claude-vbanJackMixer/mixer-opslaan.sh
+Path=/home/willem/claude-vbanJackMixer
+Icon=document-save
+Terminal=false
+Categories=AudioVideo;Audio;Mixer;
+Keywords=vban;mixer;jack;

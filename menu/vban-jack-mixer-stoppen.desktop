@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Mixer stoppen
+Comment=Alles opslaan en de mixer afsluiten
+Exec=/home/willem/claude-vbanJackMixer/mixer-stoppen.sh
+Path=/home/willem/claude-vbanJackMixer
+Icon=media-playback-stop
+Terminal=false
+Categories=AudioVideo;Audio;Mixer;
+Keywords=vban;mixer;jack;

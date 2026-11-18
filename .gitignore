@@ -3,3 +3,6 @@ vban/
 .claude/
 *.orig
 mixer.log
+.qpwgraph-herstart
+*.tmp
+__pycache__/

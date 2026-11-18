@@ -52,13 +52,31 @@ en start:
 Het script start jack_mixer, de VBAN-ontvanger en -zender en opent qpwgraph.
 Daarin verbind je de blokken met draden.
 
-- **Opslaan:** de Save-knop in qpwgraph bewaart de draden (`mixer.qpwgraph`);
-  jack_mixer slaat dan automatisch mee op (`mixer.xml`), en ook elke 30 s.
-- **Stoppen:** sluit qpwgraph (kruisje of Ctrl+Q). Dan bewaart qpwgraph ook
-  waar de blokken staan. Zet daarvoor in qpwgraph *View → Enable System Tray
-  Icon* uit; anders verbergt het kruisje qpwgraph alleen in het systeemvak.
-- **Opnieuw starten:** qpwgraph blijft open, zodat de plek van de blokken
-  bewaard blijft; de rest wordt opnieuw gestart.
+### Drie knoppen
+
+Kopieer de snelkoppelingen uit `menu/` naar `~/.local/share/applications/`
+(pas daarin het pad aan). Dan staan in het app-menu:
+
+| Knop | Wat het doet |
+|---|---|
+| **Mixer starten** | alles starten met de opgeslagen opstelling |
+| **Mixer opslaan** | faders, draden en plek van de blokken opslaan |
+| **Mixer stoppen** | alles opslaan en afsluiten |
+
+qpwgraph met het kruisje sluiten werkt ook als stoppen (en slaat ook op).
+
+### Waar wordt wat bewaard
+
+| Wat | Bestand | Door |
+|---|---|---|
+| kanalen en faders | `mixer.xml` | jack_mixer (ook elke 30 s automatisch) |
+| draden | `mixer-verbindingen.txt` | `mixer.py` |
+| plek van de blokken | `~/.config/rncbc.org/qpwgraph.conf` | qpwgraph, bij afsluiten |
+
+`mixer.py bewaken` legt de draden terug zodra een blok verschijnt (ook later,
+bijvoorbeeld Firefox als het geluid gaat spelen) en haalt dan automatische
+koppelingen van PipeWire weg. qpwgraph is alleen nog kijk- en tekenvenster:
+het script zet zijn eigen patchbay en systeemvak-icoon uit.
 
 ## Valkuilen
 

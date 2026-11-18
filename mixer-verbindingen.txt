@@ -1,0 +1,12 @@
+Firefox:output_FL	jack_mixer:Fx-USB2 L
+Firefox:output_FL	jack_mixer:Fx-vban L
+Firefox:output_FR	jack_mixer:Fx-USB2 R
+Firefox:output_FR	jack_mixer:Fx-vban R
+jack_mixer:Fx-USB2 Out L	alsa_output.usb-Generic_USB_Audio-00.pro-output-2:playback_AUX0
+jack_mixer:Fx-USB2 Out R	alsa_output.usb-Generic_USB_Audio-00.pro-output-2:playback_AUX1
+jack_mixer:Fx-vban Out L	vban-zender:input_FL
+jack_mixer:Fx-vban Out R	vban-zender:input_FR
+jack_mixer:vban-USB2 Out L	alsa_output.usb-Generic_USB_Audio-00.pro-output-2:playback_AUX0
+jack_mixer:vban-USB2 Out R	alsa_output.usb-Generic_USB_Audio-00.pro-output-2:playback_AUX1
+vban-ontvanger:playback_1	jack_mixer:vban-USB2 L
+vban-ontvanger:playback_2	jack_mixer:vban-USB2 R

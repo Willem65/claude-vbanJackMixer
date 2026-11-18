@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Mixer starten
+Comment=jack_mixer + VBAN + qpwgraph starten
+Exec=/home/willem/claude-vbanJackMixer/start-mixer.sh
+Path=/home/willem/claude-vbanJackMixer
+Icon=media-playback-start
+Terminal=false
+Categories=AudioVideo;Audio;Mixer;
+Keywords=vban;mixer;jack;
