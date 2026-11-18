@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Start jack_mixer + VBAN ontvanger/zender + qpwgraph (patchbay met blokken en draden).
-# Draait los van de terminal (venster sluiten mag). Stoppen: sluit qpwgraph.
+# Draait los van de terminal (venster sluiten mag).
+# Stoppen: in qpwgraph Graph -> Quit (Ctrl+Q) (het kruisje verbergt hem alleen in het systeemvak).
 
 # ---- INSTELLINGEN ----------------------------------------------------------
 VBAN_IP="192.168.1.2"     # IP van de andere computer met VBAN
@@ -30,7 +31,7 @@ if [ "${MIXER_LOSGEKOPPELD:-}" != 1 ]; then
     MIXER_LOSGEKOPPELD=1 setsid "$MAP/$(basename "${BASH_SOURCE[0]}")" "$@" \
         >"$LOG" 2>&1 </dev/null &
     echo "Mixer gestart. Je kunt deze terminal nu gerust sluiten."
-    echo "Stoppen: sluit qpwgraph. Meldingen: $LOG"
+    echo "Stoppen: in qpwgraph Graph -> Quit (Ctrl+Q). Meldingen: $LOG"
     exit 0
 fi
 
@@ -51,11 +52,18 @@ stop_alles() {
 }
 trap stop_alles EXIT INT TERM
 
-# Oude onderdelen van een vorige start opruimen. Anders is VBAN-poort bezet
-# ("unable to bind socket") en sluit een tweede qpwgraph meteen af, waarna
-# dit script alles weer stopt.
+# Een vorige keer gestart script stoppen (niet zijn kinderen via de trap; die
+# ruimen we hieronder zelf op). Het eigen proces en eigen subshells overslaan.
+for p in $(pgrep -u "$USER" -f 'start-mixer\.sh'); do
+    { [ "$p" = "$$" ] || [ "$p" = "$PPID" ]; } && continue
+    [ "$(ps -o ppid= -p "$p" 2>/dev/null | tr -d ' ')" = "$$" ] && continue
+    kill -KILL "$p" 2>/dev/null
+done
+
+# Oude onderdelen van een vorige start opruimen, anders is de VBAN-poort bezet
+# ("unable to bind socket"). qpwgraph blijft juist open: als je die geforceerd
+# stopt, vergeet hij waar je de blokken hebt neergezet.
 oud_draait() {
-    pgrep -u "$USER" -x qpwgraph >/dev/null ||
     pgrep -u "$USER" -x vban_receptor >/dev/null ||
     pgrep -u "$USER" -x vban_emitter >/dev/null ||
     pgrep -u "$USER" -f '(^|/)jack_mixer( |$)' >/dev/null
@@ -67,7 +75,6 @@ if oud_draait; then
         echo "Oude jack_mixer opgeslagen."
         sleep 1
     fi
-    pkill -u "$USER" -x qpwgraph
     pkill -u "$USER" -x vban_receptor
     pkill -u "$USER" -x vban_emitter
     pkill -u "$USER" -f '(^|/)jack_mixer( |$)'
@@ -77,7 +84,7 @@ if oud_draait; then
     done
     if oud_draait; then
         echo "FOUT: oude onderdelen willen niet stoppen:"
-        pgrep -a -u "$USER" -f 'qpwgraph|vban_receptor|vban_emitter|jack_mixer'
+        pgrep -a -u "$USER" -f 'vban_receptor|vban_emitter|jack_mixer'
         exit 1
     fi
 fi
@@ -133,12 +140,28 @@ echo "VBAN zender: $VBAN_OUT_NAME naar $VBAN_IP:$VBAN_PORT"
 vban_emitter -i "$VBAN_IP" -p "$VBAN_PORT" -s "$VBAN_OUT_NAME" -b pulseaudio -r 48000 -x 1024 & pids+=($!)
 
 sleep 1
+# -a -x: patchbay actief + exclusief, dus qpwgraph legt de opgeslagen draden
+# terug en haalt automatische koppelingen weg (zoals vban -> USB-ingang).
 if [ -f "$PATCHBAY_FILE" ]; then
-    # -a -x: patchbay actief + exclusief, dus qpwgraph legt de opgeslagen draden
-    # terug en haalt automatische koppelingen weg (zoals vban -> USB-ingang).
-    echo "qpwgraph openen met $PATCHBAY_FILE..."
-    qpwgraph -a -x "$PATCHBAY_FILE"
+    qpw_args=(-a -x "$PATCHBAY_FILE")
 else
-    echo "qpwgraph openen (geen draden: $PATCHBAY_FILE bestaat nog niet)..."
-    qpwgraph
+    echo "Let op: $PATCHBAY_FILE bestaat nog niet (nog geen draden opgeslagen)."
+    qpw_args=()
 fi
+if pgrep -u "$USER" -x qpwgraph >/dev/null; then
+    # Draait al: dat venster gewoon houden (dan blijft je indeling van de
+    # blokken bewaard). Een tweede qpwgraph geeft alles door aan de eerste.
+    echo "qpwgraph draait al, die blijft open."
+    qpwgraph "${qpw_args[@]}"
+else
+    echo "qpwgraph openen..."
+    qpwgraph "${qpw_args[@]}" &
+fi
+
+# Wachten tot qpwgraph echt afgesloten is (Graph -> Quit, Ctrl+Q, of via het
+# systeemvak-icoon -> Quit). Het venster met het kruisje sluiten verbergt
+# qpwgraph alleen in het systeemvak; dan blijft de mixer gewoon draaien.
+sleep 2
+while pgrep -u "$USER" -x qpwgraph >/dev/null; do
+    sleep 2
+done

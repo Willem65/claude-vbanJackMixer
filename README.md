@@ -52,6 +52,13 @@ en start:
 Het script start jack_mixer, de VBAN-ontvanger en -zender en opent qpwgraph.
 Daarin verbind je de blokken met draden.
 
+- **Opslaan:** de Save-knop in qpwgraph bewaart de draden (`mixer.qpwgraph`);
+  jack_mixer slaat dan automatisch mee op (`mixer.xml`), en ook elke 30 s.
+- **Stoppen:** in qpwgraph *Graph → Quit* (Ctrl+Q). Het kruisje verbergt
+  qpwgraph alleen in het systeemvak.
+- **Opnieuw starten:** qpwgraph blijft open, zodat de plek van de blokken
+  bewaard blijft; de rest wordt opnieuw gestart.
+
 ## Valkuilen
 
 - `vban_emitter` heeft geen jack-backend; hij draait via PulseAudio
