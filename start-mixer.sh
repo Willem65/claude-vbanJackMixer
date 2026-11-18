@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Start jack_mixer + VBAN ontvanger/zender + qpwgraph (patchbay met blokken en draden).
 # Draait los van de terminal (venster sluiten mag).
-# Stoppen: in qpwgraph Graph -> Quit (Ctrl+Q) (het kruisje verbergt hem alleen in het systeemvak).
+# Stoppen: sluit qpwgraph (kruisje of Ctrl+Q). Zet in qpwgraph View ->
+# 'Enable System Tray Icon' UIT, anders verbergt het kruisje hem alleen.
 
 # ---- INSTELLINGEN ----------------------------------------------------------
 VBAN_IP="192.168.1.2"     # IP van de andere computer met VBAN
@@ -31,7 +32,7 @@ if [ "${MIXER_LOSGEKOPPELD:-}" != 1 ]; then
     MIXER_LOSGEKOPPELD=1 setsid "$MAP/$(basename "${BASH_SOURCE[0]}")" "$@" \
         >"$LOG" 2>&1 </dev/null &
     echo "Mixer gestart. Je kunt deze terminal nu gerust sluiten."
-    echo "Stoppen: in qpwgraph Graph -> Quit (Ctrl+Q). Meldingen: $LOG"
+    echo "Stoppen: sluit qpwgraph (kruisje of Ctrl+Q). Meldingen: $LOG"
     exit 0
 fi
 
@@ -158,9 +159,9 @@ else
     qpwgraph "${qpw_args[@]}" &
 fi
 
-# Wachten tot qpwgraph echt afgesloten is (Graph -> Quit, Ctrl+Q, of via het
-# systeemvak-icoon -> Quit). Het venster met het kruisje sluiten verbergt
-# qpwgraph alleen in het systeemvak; dan blijft de mixer gewoon draaien.
+# Wachten tot qpwgraph echt afgesloten is. qpwgraph bewaart de plek van de
+# blokken alleen bij echt afsluiten. Staat zijn systeemvak-icoon aan, dan
+# verbergt het kruisje hem alleen en blijft de mixer gewoon draaien.
 sleep 2
 while pgrep -u "$USER" -x qpwgraph >/dev/null; do
     sleep 2

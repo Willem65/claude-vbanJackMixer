@@ -54,8 +54,9 @@ Daarin verbind je de blokken met draden.
 
 - **Opslaan:** de Save-knop in qpwgraph bewaart de draden (`mixer.qpwgraph`);
   jack_mixer slaat dan automatisch mee op (`mixer.xml`), en ook elke 30 s.
-- **Stoppen:** in qpwgraph *Graph → Quit* (Ctrl+Q). Het kruisje verbergt
-  qpwgraph alleen in het systeemvak.
+- **Stoppen:** sluit qpwgraph (kruisje of Ctrl+Q). Dan bewaart qpwgraph ook
+  waar de blokken staan. Zet daarvoor in qpwgraph *View → Enable System Tray
+  Icon* uit; anders verbergt het kruisje qpwgraph alleen in het systeemvak.
 - **Opnieuw starten:** qpwgraph blijft open, zodat de plek van de blokken
   bewaard blijft; de rest wordt opnieuw gestart.
 
