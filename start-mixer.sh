@@ -129,15 +129,15 @@ else
 fi
 
 echo "VBAN ontvanger: $VBAN_IN_NAME van $VBAN_IP:$VBAN_PORT"
-pw-jack vban_receptor -i "$VBAN_IP" -p "$VBAN_PORT" -s "$VBAN_IN_NAME" -b jack & pids+=($!)
+pw-jack vban_receptor -i "$VBAN_IP" -p "$VBAN_PORT" -s "$VBAN_IN_NAME" -b jack -d vban-ontvanger & pids+=($!)
 
 # Let op: vban_emitter ondersteunt (nog) geen jack-backend; via pulseaudio
-# verschijnt hij in PipeWire/qpwgraph toch als blok "vban" met ingangen FL/FR.
-# De ontvanger-blok verschijnt pas zodra er echt VBAN-pakketten binnenkomen.
+# verschijnt hij in PipeWire/qpwgraph toch als blok "vban-zender" met ingangen FL/FR.
+# Het blok "vban-ontvanger" verschijnt pas zodra er echt VBAN-pakketten binnenkomen.
 echo "VBAN zender: $VBAN_OUT_NAME naar $VBAN_IP:$VBAN_PORT"
 # -r 48000: gelijk aan PipeWire (geen omrekenen). Vereist de aangepaste vban
 # (pulseaudio_backend.c, kleine record-buffer), anders komt het geluid in stoten van ~2s.
-vban_emitter -i "$VBAN_IP" -p "$VBAN_PORT" -s "$VBAN_OUT_NAME" -b pulseaudio -r 48000 -x 1024 & pids+=($!)
+PULSE_PROP="application.name=vban-zender node.name=vban-zender" vban_emitter -i "$VBAN_IP" -p "$VBAN_PORT" -s "$VBAN_OUT_NAME" -b pulseaudio -r 48000 -x 1024 & pids+=($!)
 
 sleep 1
 # -a -x: patchbay actief + exclusief, dus qpwgraph legt de opgeslagen draden

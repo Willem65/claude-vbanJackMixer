@@ -62,8 +62,8 @@ Daarin verbind je de blokken met draden.
 ## Valkuilen
 
 - `vban_emitter` heeft geen jack-backend; hij draait via PulseAudio
-  (`-b pulseaudio -r 48000`) en verschijnt in qpwgraph als blok **vban**.
-- Het ontvangstblok verschijnt pas als er echt VBAN-pakketten binnenkomen.
+  (`-b pulseaudio -r 48000`) en verschijnt in qpwgraph als blok **vban-zender**.
+- Het blok **vban-ontvanger** verschijnt pas als er echt VBAN-pakketten binnenkomen.
 - jack_mixer heeft hier geen MAIN-uitgangen; gebruik de uitgangen
   `Input-N Out` van de kanalen.
 - Na een herstart koppelt PipeWire `vban_emitter` soms automatisch aan de
