@@ -66,6 +66,16 @@ if oud_draait; then
     fi
 fi
 
+# Geen mixer.xml? Neem dan het nieuwste bestand dat jack_mixer zelf op zijn
+# standaardplek heeft opgeslagen, en kopieer dat naar mixer.xml.
+if [ ! -f "$MIXER_FILE" ]; then
+    nieuwste="$(ls -t "$HOME/.local/share/jack_mixer/"*.xml 2>/dev/null | head -n 1)"
+    if [ -n "$nieuwste" ]; then
+        echo "mixer.xml ontbrak, overgenomen van $nieuwste"
+        cp "$nieuwste" "$MIXER_FILE"
+    fi
+fi
+
 if [ -f "$MIXER_FILE" ]; then
     echo "jack_mixer starten met $MIXER_FILE..."
     pw-jack jack_mixer -c "$MIXER_FILE" & pids+=($!)
