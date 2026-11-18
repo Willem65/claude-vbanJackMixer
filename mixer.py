@@ -78,9 +78,14 @@ def draden_opslaan():
 
 
 def opslaan():
-    mixer = jack_mixer_opslaan()
+    """Faders + draden opslaan. Draait jack_mixer niet, dan de draden NIET
+    opslaan: anders zou een half gestarte mixer de goede lijst overschrijven."""
+    if not jack_mixer_opslaan():
+        print("Niets opgeslagen: jack_mixer draait niet (opgeslagen draden blijven bewaard)")
+        return False
     n = draden_opslaan()
-    print(f"Opgeslagen: {n} draden" + (", jack_mixer" if mixer else " (jack_mixer draait niet)"))
+    print(f"Opgeslagen: {n} draden en jack_mixer")
+    return True
 
 
 # ---------------------------------------------------------------- bewaken
@@ -186,20 +191,41 @@ def qpwgraph_draait():
                           capture_output=True).returncode == 0
 
 
-def sluit_qpwgraph(wacht=10):
+def _wacht_tot_dicht(sec):
+    eind = time.time() + sec
+    while time.time() < eind:
+        if not qpwgraph_draait():
+            return True
+        time.sleep(0.2)
+    return False
+
+
+def sluit_qpwgraph(wacht=8):
+    """Netjes sluiten (zoals het kruisje), zodat qpwgraph de plek van de
+    blokken bewaart. Lukt dat niet (verstopt in het systeemvak, of een vraag
+    die openstaat), dan toch stoppen; alleen recent verschoven blokken gaan
+    dan verloren."""
     if not qpwgraph_draait():
         return 0
     vensters = qpwgraph_vensters()
+    if not vensters:
+        # Verstopt in het systeemvak: een tweede 'qpwgraph' haalt het venster terug.
+        subprocess.Popen(["qpwgraph"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        for _ in range(25):
+            time.sleep(0.2)
+            vensters = qpwgraph_vensters()
+            if vensters:
+                break
     for v in vensters:
         venster_sluiten(v)
-    eind = time.time() + wacht
-    while time.time() < eind:
-        if not qpwgraph_draait():
-            return 0
-        time.sleep(0.2)
-    print("qpwgraph sluit niet (staat er een vraag open, of zit hij in het systeemvak?)",
-          file=sys.stderr)
-    return 1
+    if _wacht_tot_dicht(wacht):
+        return 0
+    print("qpwgraph sloot niet netjes; wordt nu gestopt.", file=sys.stderr)
+    subprocess.run(["pkill", "-u", str(os.getuid()), "-x", "qpwgraph"])
+    if _wacht_tot_dicht(3):
+        return 0
+    subprocess.run(["pkill", "-KILL", "-u", str(os.getuid()), "-x", "qpwgraph"])
+    return 0 if _wacht_tot_dicht(2) else 1
 
 
 def qpwgraph_instellen():
@@ -246,7 +272,7 @@ def qpwgraph_instellen():
 if __name__ == "__main__":
     opdracht = sys.argv[1] if len(sys.argv) > 1 else ""
     if opdracht == "opslaan":
-        opslaan()
+        sys.exit(0 if opslaan() else 3)
     elif opdracht == "bewaken":
         bewaken()
     elif opdracht == "sluit-qpwgraph":

@@ -6,7 +6,10 @@ MAP="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 melding() { echo "$1"; notify-send -i document-save "Mixer" "$1" 2>/dev/null; }
 
-uitvoer="$(python3 "$MAP/mixer.py" opslaan 2>&1)"
+if ! uitvoer="$(python3 "$MAP/mixer.py" opslaan 2>&1)"; then
+    melding "De mixer draait niet (jack_mixer is dicht), dus er valt niets op te slaan. Je laatst opgeslagen opstelling blijft bewaard."
+    exit 1
+fi
 
 if pgrep -u "$USER" -x qpwgraph >/dev/null; then
     if pgrep -u "$USER" -f 'start-mixer\.sh' >/dev/null; then
