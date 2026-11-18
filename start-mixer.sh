@@ -34,8 +34,19 @@ if [ "${MIXER_LOSGEKOPPELD:-}" != 1 ]; then
     exit 0
 fi
 
+jm_pid=""   # jack_mixer, alleen gezet als hij met mixer.xml is gestart
+
+# jack_mixer stil laten opslaan naar mixer.xml (SIGUSR1 = Ctrl+S, zonder venster).
+mixer_opslaan() {
+    [ -n "$jm_pid" ] && kill -0 "$jm_pid" 2>/dev/null && kill -USR1 "$jm_pid"
+}
+
 stop_alles() {
     echo "Stoppen..."
+    if mixer_opslaan; then
+        echo "jack_mixer opgeslagen in $MIXER_FILE"
+        sleep 1
+    fi
     for p in "${pids[@]}"; do kill "$p" 2>/dev/null; done
 }
 trap stop_alles EXIT INT TERM
@@ -79,8 +90,14 @@ fi
 if [ -f "$MIXER_FILE" ]; then
     echo "jack_mixer starten met $MIXER_FILE..."
     pw-jack jack_mixer -c "$MIXER_FILE" & pids+=($!)
+    jm_pid=$!
+    # Elke 30 s automatisch opslaan, zodat er niets verloren gaat als je
+    # jack_mixer of qpwgraph sluit of de computer uitzet.
+    ( while sleep 30; do kill -0 "$jm_pid" 2>/dev/null || exit; kill -USR1 "$jm_pid"; done ) &
+    pids+=($!)
 else
     echo "jack_mixer starten (leeg: $MIXER_FILE bestaat nog niet)..."
+    echo "Sla jack_mixer 1x op als $MIXER_FILE, daarna gaat opslaan automatisch."
     pw-jack jack_mixer & pids+=($!)
 fi
 
