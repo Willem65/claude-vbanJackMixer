@@ -2,6 +2,10 @@
 <patchbay version="0.6.1" name="mixer">
  <items>
   <item port-type="pipewire-audio" node-type="pipewire">
+   <output node="vban-ontvanger" port="vban-ontvanger:playback_1"/>
+   <input node="jack_mixer" port="jack_mixer:vban-USB2 L"/>
+  </item>
+  <item port-type="pipewire-audio" node-type="pipewire">
    <output node="Firefox" port="Firefox:output_FL"/>
    <input node="jack_mixer" port="jack_mixer:Fx-USB2 L"/>
   </item>
@@ -10,16 +14,20 @@
    <input node="jack_mixer" port="jack_mixer:Fx-USB2 R"/>
   </item>
   <item port-type="pipewire-audio" node-type="pipewire">
-   <output node="vban-ontvanger" port="vban-ontvanger:playback_2"/>
+   <output node="vban" port="vban:playback_2"/>
    <input node="jack_mixer" port="jack_mixer:vban-USB2 R"/>
   </item>
   <item port-type="pipewire-audio" node-type="pipewire">
    <output node="jack_mixer" port="jack_mixer:Fx-vban Out R"/>
-   <input node="vban-zender" port="vban-zender:input_FR"/>
+   <input node="vban" port="vban:input_FR"/>
   </item>
   <item port-type="pipewire-audio" node-type="pipewire">
    <output node="jack_mixer" port="jack_mixer:Fx-USB2 Out L"/>
    <input node="USB Audio Pro 2" port="USB Audio #2:playback_AUX0"/>
+  </item>
+  <item port-type="pipewire-audio" node-type="pipewire">
+   <output node="vban-ontvanger" port="vban-ontvanger:playback_2"/>
+   <input node="jack_mixer" port="jack_mixer:vban-USB2 R"/>
   </item>
   <item port-type="pipewire-audio" node-type="pipewire">
    <output node="jack_mixer" port="jack_mixer:vban-USB2 Out R"/>
@@ -27,7 +35,7 @@
   </item>
   <item port-type="pipewire-audio" node-type="pipewire">
    <output node="jack_mixer" port="jack_mixer:Fx-vban Out L"/>
-   <input node="vban-zender" port="vban-zender:input_FL"/>
+   <input node="vban" port="vban:input_FL"/>
   </item>
   <item port-type="pipewire-audio" node-type="pipewire">
    <output node="Firefox" port="Firefox:output_FR"/>
@@ -38,12 +46,20 @@
    <input node="jack_mixer" port="jack_mixer:Fx-vban L"/>
   </item>
   <item port-type="pipewire-audio" node-type="pipewire">
-   <output node="vban-ontvanger" port="vban-ontvanger:playback_1"/>
+   <output node="vban" port="vban:playback_1"/>
    <input node="jack_mixer" port="jack_mixer:vban-USB2 L"/>
+  </item>
+  <item port-type="pipewire-audio" node-type="pipewire">
+   <output node="jack_mixer" port="jack_mixer:Fx-vban Out R"/>
+   <input node="vban/vban-zender" port="vban-zender:input_FR"/>
   </item>
   <item port-type="pipewire-audio" node-type="pipewire">
    <output node="jack_mixer" port="jack_mixer:vban-USB2 Out L"/>
    <input node="USB Audio Pro 2" port="USB Audio #2:playback_AUX0"/>
+  </item>
+  <item port-type="pipewire-audio" node-type="pipewire">
+   <output node="jack_mixer" port="jack_mixer:Fx-vban Out L"/>
+   <input node="vban/vban-zender" port="vban-zender:input_FL"/>
   </item>
   <item port-type="pipewire-audio" node-type="pipewire">
    <output node="jack_mixer" port="jack_mixer:Fx-USB2 Out R"/>
