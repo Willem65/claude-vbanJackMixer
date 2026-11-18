@@ -91,9 +91,24 @@ if [ -f "$MIXER_FILE" ]; then
     echo "jack_mixer starten met $MIXER_FILE..."
     pw-jack jack_mixer -c "$MIXER_FILE" & pids+=($!)
     jm_pid=$!
-    # Elke 30 s automatisch opslaan, zodat er niets verloren gaat als je
-    # jack_mixer of qpwgraph sluit of de computer uitzet.
-    ( while sleep 30; do kill -0 "$jm_pid" 2>/dev/null || exit; kill -USR1 "$jm_pid"; done ) &
+    # jack_mixer slaat zichzelf op:
+    #  - meteen zodra je in qpwgraph op Save drukt (mixer.qpwgraph verandert),
+    #    zodat die ene Save-knop alles bewaart;
+    #  - en voor de zekerheid elke 30 s.
+    (
+        laatst="$(stat -c %Y "$PATCHBAY_FILE" 2>/dev/null)"
+        tel=0
+        while sleep 2; do
+            kill -0 "$jm_pid" 2>/dev/null || exit
+            nu="$(stat -c %Y "$PATCHBAY_FILE" 2>/dev/null)"
+            tel=$((tel + 2))
+            if [ "$nu" != "$laatst" ] || [ "$tel" -ge 30 ]; then
+                kill -USR1 "$jm_pid"
+                laatst="$nu"
+                tel=0
+            fi
+        done
+    ) &
     pids+=($!)
 else
     echo "jack_mixer starten (leeg: $MIXER_FILE bestaat nog niet)..."
