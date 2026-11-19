@@ -83,8 +83,6 @@ het script zet zijn eigen patchbay en systeemvak-icoon uit.
 - `vban_emitter` heeft geen jack-backend; hij draait via PulseAudio
   (`-b pulseaudio -r 48000`) en verschijnt in qpwgraph als blok **vban-zender**.
 - Het blok **vban-ontvanger** verschijnt pas als er echt VBAN-pakketten binnenkomen.
-- jack_mixer heeft hier geen MAIN-uitgangen; gebruik de uitgangen
-  `Input-N Out` van de kanalen.
 - Na een herstart koppelt PipeWire `vban_emitter` soms automatisch aan de
   USB-ingang (stilte). Opnieuw bedraden, of in qpwgraph de patchbay opslaan
   en *Activated* + *Exclusive* aanzetten.
